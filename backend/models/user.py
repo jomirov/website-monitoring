@@ -17,3 +17,7 @@ class User(Base):
 class UserRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
+
+class UserAuth(BaseModel):
+    email: str
+    password: str

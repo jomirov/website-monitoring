@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аутентификация</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <div id="container">
+        <form class="form-auth" id="form-login">
+            <p>Вход в аккаунт</p>
+            <label for="email">Электронная почта</label>
+            <input type="email" id="email" placeholder="Электронная почта" required autocomplete="off">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" minlength="8" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+            <button type="button">Создать аккаунт</button>
+        </form>
+        <form class="form-auth" id="form-sign-up" style="display: none">
+            <p>Создание аккаунта</p>
+            <label for="email">Электронная почта</label>
+            <input type="email" id="email" name="email" placeholder="example@example.com">
+            <label for="password">Пароль</label>
+            <input type="text" id="password" name="password" placeholder="Например, Example123*">
+            <button type="submit">Создать</button>
+            <button type="button">Войти в аккаунт</button>
+        </form>
+    </div>
+    <script>
+        form_login = document.getElementById("form-login");
+        form_sign_up = document.getElementById("form-sign-up");
+        
+        form_login.querySelectorAll("button")[1].addEventListener("click", () => {
+            form_login.style.display = "none";
+            form_sign_up.style.display = "flex";
+        })
+        form_sign_up.querySelectorAll("button")[1].addEventListener("click", () => {
+            form_login.style.display = "flex";
+            form_sign_up.style.display = "none";
+        })
+        form_sign_up.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            email = form_sign_up.querySelector("#email").value;
+            password = form_sign_up.querySelector("#password").value;
+
+            response = await fetch("http://localhost:8000/api/users", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({"email": email, "password": password})
+            })
+            res = await response.json()
+
+            if (res.status_code == 201) {
+                alert("Пользователь создан");
+            }
+        })
+
+        form_login.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            form_data = new FormData();
+            email = form_login.querySelector("#email").value;
+            password = form_login.querySelector("#password").value;
+
+            form_data.append("username", email);
+            form_data.append("password", password);
+
+            response = await fetch("http://localhost:8000/token", {
+                method: "POST",
+                body: form_data
+            })
+            res = await response.json();
+            alert(res.access_token);
+            localStorage("access_token", res.access_token)
+        })
+    </script>
+</body>
+</html>

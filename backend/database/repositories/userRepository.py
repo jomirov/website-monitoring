@@ -1,23 +1,20 @@
+from datetime import datetime
+from dotenv import load_dotenv, unset_key
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
+from pwdlib import PasswordHash
 from ..db import engine
-from ..models.user import User
-from datetime import datetime
-from dotenv import load_dotenv, set_key, unset_key
-from ...dependencies import generate_token
+from ...models.user import User
 
 load_dotenv()
 
 class UserRepository:
     def add_user(self, email, password):
         with Session(engine) as session:
-            u = User(email=str(email), hashed_password=hash(str(password)), created_at=datetime.now())
+            hashed_password = PasswordHash.recommended().hash(str(password))
+            u = User(email=str(email), hashed_password=hashed_password, created_at=datetime.now())
             session.add(u)
             session.commit()
-
-            x_token = generate_token()
-            id = session.execute(select(User)).all()[-1][0].id
-            set_key(".env", key_to_set=id, value_to_set=x_token)
 
     def get_all_users(self):
         with Session(engine) as session:
@@ -42,6 +39,19 @@ class UserRepository:
             if res == None:
                 return None
             
+            return {
+                "id": res[0].id,
+                "email": res[0].email,
+                "hashed_password": res[0].hashed_password,
+                "created_at": datetime.strftime(res[0].created_at, "%Y-%m-%d")
+            }
+
+    def get_user_by_email(self, email):
+        with Session(engine) as session:
+            res = session.execute(select(User).where(User.email==email)).first()
+
+            if not res: return None
+
             return {
                 "id": res[0].id,
                 "email": res[0].email,

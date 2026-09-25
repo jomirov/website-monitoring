@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Cookie
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from ..database.models.user import UserRequest
+from ..models.user import UserRequest
 from ..database.repositories.userRepository import UserRepository
 
 router = APIRouter()

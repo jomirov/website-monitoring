@@ -2,8 +2,8 @@ import time
 from ..db import engine
 from sqlalchemy import select, delete, Null
 from sqlalchemy.orm import Session
-from ..models.website import Website
-from ..models.check_log import Check_log
+from ...models.website import Website
+from ...models.check_log import Check_log
 
 class WebsiteRepository:
     def insert_website(self, user_id, name, url):
@@ -47,7 +47,7 @@ class WebsiteRepository:
             res = session.execute(select(Website.id, Website.url, Website.check_interval)).all()
 
             websites = []
-
+            
             for row in res:
                 websites.append({
                     "id": row.id,

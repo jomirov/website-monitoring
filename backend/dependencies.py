@@ -1,17 +1,9 @@
-import dotenv, httpx, random, string
-from datetime import datetime
+import dotenv, httpx, time
+from datetime import datetime, timedelta
 from .database.repositories.websiteRepository import WebsiteRepository
 from .database.repositories.checkLogRepository import CheckLogRepository
-import time
-
-def generate_token():
-    return "".join(random.choices(string.ascii_lowercase+string.ascii_uppercase+string.digits, k=20))
-
-def get_user_id_by_token(X_TOKEN):
-    tokens = dotenv.dotenv_values(".env").items()
-    for user_token in tokens:
-        if user_token[1] == X_TOKEN:
-            return int(user_token[0])
+from .database.repositories.userRepository import UserRepository
+from .models.user import UserAuth
 
 def check_url(url):
     res = httpx.get(url)
@@ -53,3 +45,42 @@ def check_websites():
                                 status["response_time_ms"],
                                 status["is_up"],
                                 status["checked_at"])
+
+import jwt
+from pwdlib import PasswordHash
+
+def authenticate_user(form: UserAuth):
+    repo = UserRepository()
+    password_hash = PasswordHash.recommended()
+
+    user = repo.get_user_by_email(form.email)
+    if not user:
+        return False
+    if not password_hash.verify(form.password, user.get("hashed_password")):
+        return False
+    
+    return user
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+
+    if timedelta:
+        expire = datetime.now() + expires_delta
+    else:
+        expire = datetime.now() + timedelta(minutes=5)
+
+    to_encode.update({"exp":expire})
+
+    SECRET_KEY = dotenv.get_key(".env", "SECRET_KEY")
+    ALGORITHM = dotenv.get_key(".env", "ALGORITHM")
+    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    return token
+
+def get_current_user(token):
+    repo = UserRepository()
+    data = jwt.decode(token, SECRET_KEY=dotenv.get_key(".env", "SECRET_KEY"), algorithms=[dotenv.get_key(".env", "ALGORITHM")])
+
+    email = data.get("sub")
+    
+    return repo.get_user_by_email(email)

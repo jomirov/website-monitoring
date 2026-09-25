@@ -1,5 +1,5 @@
 from ..db import engine
-from ..models.check_log import Check_log
+from ...models.check_log import Check_log
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
