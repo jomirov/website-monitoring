@@ -1,12 +1,9 @@
 from datetime import datetime
-from dotenv import load_dotenv, unset_key
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
 from pwdlib import PasswordHash
 from ..db import engine
 from ...models.user import User
-
-load_dotenv()
 
 class UserRepository:
     def add_user(self, email, password):
@@ -66,6 +63,5 @@ class UserRepository:
                 return None
             session.execute(delete(User).where(User.id==id))
             session.commit()
-            unset_key(".env", key_to_unset=str(id))
 
             return 1

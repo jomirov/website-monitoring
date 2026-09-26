@@ -1,6 +1,6 @@
 from pytz import utc
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ProcessPoolExecutor
 
@@ -17,7 +17,6 @@ job_defaults = {
     'max_instances': 3
 }
 
-scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc)
+scheduler = AsyncIOScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc) #executors default = asyncioexecutor
 
-# scheduler.remove_job('websites_checker')
-# scheduler.add_job(check_websites, 'interval', seconds=10, id='websites_checker')
+scheduler.add_job(check_websites, 'interval', seconds=10, id='websites_checker', replace_existing=True)

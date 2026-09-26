@@ -7,10 +7,10 @@ from .database.repositories.telegramRepository import TelegramRepository
 from .models.user import UserAuth
 from .utils.telegramBot import send_message
 
-def check_url(url):
-    res = httpx.get(url)
+async def check_url(url):
+    res = await httpx.AsyncClient().get(url)
 
-    status_code = res.status_code
+    status_code =  res.status_code
     response_time_ms = res.elapsed.microseconds
     is_up = True if status_code == 200 else False
     checked_at = datetime.now()
@@ -22,7 +22,7 @@ def check_url(url):
         "checked_at": checked_at
     }
 
-def check_websites():
+async def check_websites():
     w_repo = WebsiteRepository()
     cl_repo = CheckLogRepository()
     t_repo = TelegramRepository()
@@ -39,19 +39,20 @@ def check_websites():
             check_logs = cl_repo.get_logs_by_website_id(w_id)
             if len(check_logs) == 0:
                 pass
-            elif datetime.timestamp(datetime.strptime(check_logs[-1]["checked_at"], "%Y-%m-%d %H:%M")) > time.time() - w_check_interval:
+            elif datetime.timestamp(datetime.strptime(check_logs[0]["checked_at"], "%Y-%m-%d %H:%M")) > time.time() - w_check_interval:
                 continue
 
-            status = check_url(w_url)
+            status = await check_url(w_url)
 
-            chat_id = t_repo.get_chat_id_by_user_id(w_user_id)
-            send_message(chat_id=chat_id, text=f"URL: {w_url}\nStatus code: {status["status_code"]}\nResponse time: {status["response_time_ms"]} ms.\nStatus: {"Active" if status["is_up"] else "Inactive"}\nChecked at: {status["checked_at"]}")
-            
             cl_repo.add_check_log(w_id, 
                                 status["status_code"],
                                 status["response_time_ms"],
                                 status["is_up"],
                                 status["checked_at"])
+
+            chat_id = t_repo.get_chat_id_by_user_id(w_user_id)
+            if chat_id:
+                send_message(chat_id=chat_id, text=f"URL: {w_url}\nStatus code: {status["status_code"]}\nResponse time: {status["response_time_ms"]} ms.\nStatus: {"Active" if status["is_up"] else "Inactive"}\nChecked at: {status["checked_at"]}")
 
 import jwt
 from pwdlib import PasswordHash

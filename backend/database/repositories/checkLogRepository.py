@@ -21,7 +21,7 @@ class CheckLogRepository:
 
     def get_logs_by_website_id(self, website_id):
         with Session(engine) as session:
-            res = session.execute(select(Check_log).where(Check_log.website_id==website_id).limit(10)).all()
+            res = session.execute(select(Check_log).where(Check_log.website_id==website_id).order_by(Check_log.checked_at.desc()).limit(10)).all()
             logs = []
 
             for row in res:
