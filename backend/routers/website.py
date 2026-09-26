@@ -14,11 +14,11 @@ load_dotenv()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     
-    # scheduler.start()
+    scheduler.start()
 
     yield
 
-    # scheduler.shutdown()
+    scheduler.shutdown()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

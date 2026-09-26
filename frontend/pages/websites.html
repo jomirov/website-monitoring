@@ -21,8 +21,8 @@
                 </form>
                 <form id="form-telegram">
                     <h4>Привязка Telegram</h4>
-                    <label>Telegram</label>
-                    <input type="text" placeholder="Telegram username">
+                    <label>Telegram</label> 
+                    <input type="text" id="chat-id" placeholder="Chat ID">
                     <button type="submit">Привязать Telegram</button>
                 </form>
             </div>
@@ -86,7 +86,14 @@
             window.location.href = "login.html";
         })
 
-
+        document.getElementById("form-telegram").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            chat_id = document.getElementById("chat-id").value;
+            response = await fetch(`http://localhost:8000/api/users/telegram?chat_id=${chat_id}`, {
+                method: "POST",
+                headers: {"Authorization": `Bearer ${localStorage.getItem("access_token")}`}
+            })
+        })
     </script>
 </body>
 </html>

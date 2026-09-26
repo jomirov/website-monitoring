@@ -46,13 +46,14 @@ class WebsiteRepository:
 
     def get_websites_need_to_check(self):
         with Session(engine) as session: 
-            res = session.execute(select(Website.id, Website.url, Website.check_interval)).all()
+            res = session.execute(select(Website.id, Website.user_id, Website.url, Website.check_interval)).all()
 
             websites = []
             
             for row in res:
                 websites.append({
                     "id": row.id,
+                    "user_id": row.user_id,
                     "url": row.url,
                     "check_interval": row.check_interval
                 })

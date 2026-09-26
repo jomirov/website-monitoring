@@ -3,7 +3,9 @@ from datetime import datetime, timedelta, timezone
 from .database.repositories.websiteRepository import WebsiteRepository
 from .database.repositories.checkLogRepository import CheckLogRepository
 from .database.repositories.userRepository import UserRepository
+from .database.repositories.telegramRepository import TelegramRepository
 from .models.user import UserAuth
+from .utils.telegramBot import send_message
 
 def check_url(url):
     res = httpx.get(url)
@@ -23,12 +25,14 @@ def check_url(url):
 def check_websites():
     w_repo = WebsiteRepository()
     cl_repo = CheckLogRepository()
+    t_repo = TelegramRepository()
     
     websites = w_repo.get_websites_need_to_check()
 
     if len(websites) != 0:
         for w in websites:
             w_id = w["id"]
+            w_user_id = w["user_id"]
             w_url = w["url"]
             w_check_interval = w["check_interval"]
 
@@ -39,6 +43,9 @@ def check_websites():
                 continue
 
             status = check_url(w_url)
+
+            chat_id = t_repo.get_chat_id_by_user_id(w_user_id)
+            send_message(chat_id=chat_id, text=f"URL: {w_url}\nStatus code: {status["status_code"]}\nResponse time: {status["response_time_ms"]} ms.\nStatus: {"Active" if status["is_up"] else "Inactive"}\nChecked at: {status["checked_at"]}")
             
             cl_repo.add_check_log(w_id, 
                                 status["status_code"],
