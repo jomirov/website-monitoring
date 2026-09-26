@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аутентификация</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <div id="container">
+    <div id="container" style="align-items:flex-start">
         <form class="form-auth" id="form-login">
             <p>Вход в аккаунт</p>
             <label for="email">Электронная почта</label>
@@ -55,6 +55,7 @@
             if (res.status_code == 201) {
                 alert("Пользователь создан");
             }
+            window.location.reload();
         })
 
         form_login.addEventListener("submit", async (e) => {
@@ -70,11 +71,23 @@
             response = await fetch("http://localhost:8000/token", {
                 method: "POST",
                 body: form_data
-            })
+            });
             res = await response.json();
-            alert(res.access_token);
-            localStorage("access_token", res.access_token)
+            localStorage.setItem("access_token", res.access_token)
+            window.location.href = "websites.html";
         })
+
+        async function isLogged() {
+            response = await fetch("http://localhost:8000/users/me", {
+                method: "GET",
+                headers: {"Authorization": `Bearer ${localStorage.getItem("access_token")}`}
+            });
+            if (response.status == 401) {
+                return;
+            }
+            window.location.href = "websites.html";
+        }
+        isLogged();
     </script>
 </body>
 </html>

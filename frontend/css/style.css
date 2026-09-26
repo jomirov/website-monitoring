@@ -5,12 +5,13 @@
 }
 
 :root {
-    --sky-blue: rgb(30, 128, 255)
+    --sky-blue: rgb(30, 128, 255);
+    --lite-white: rgb(234, 237, 249);
 }
 
 html {
     height: 100%;
-    width: 100%
+    width: 100%;
 }
 body {
     background-color: rgba(0,0,0,0.3);
@@ -21,11 +22,15 @@ body {
 #container {
     display: flex;
     justify-content: center;
-    align-items: center;
     width: 100%;
     height: 100%
 }
 
+/**************
+
+login.html
+
+**************/
 .form-auth {
     display: flex;
     flex-direction: column;
@@ -36,7 +41,7 @@ body {
     gap: 10px;
     border-radius: 20px;
     position: relative;
-    bottom: 100px
+    top: 100px
 }
 
 .form-auth p {
@@ -56,7 +61,7 @@ body {
     padding-inline: 10px;
     border-radius: 5px;
     outline: none;
-    border: 1px solid rgb(209, 207, 207);
+    border: 1px solid var(--sky-blue);
 }
 
 .form-auth button {
@@ -77,4 +82,176 @@ body {
 .form-auth button[type="button"] {
     background: none;
     border: 1px solid var(--sky-blue)
+}
+
+
+/************************
+
+websites.html
+
+************************/
+
+#logout-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    background: red;
+    border:none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#websites-container {
+    display:flex;
+    flex-direction: column;
+    width: 600px;
+    position: relative;
+    background: var(--lite-white);
+    padding: 30px;
+    gap: 20px;
+    border-radius: 20px;
+    top: 80px;
+}
+
+#websites-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+#top-section {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: space-between;
+}
+
+#form-website label {
+    font-size: 0.9rem;
+}
+
+#form-website, #form-telegram {
+    gap: 10px;
+}
+
+#form-website input, #form-telegram input {
+    border: 1px solid var(--sky-blue);
+    border-radius: 5px;
+    padding: 5px;
+    outline: none;
+}
+
+#form-website button, #form-telegram button {
+    background-color: var(--sky-blue);
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+#websites-container table {
+    border-collapse: collapse;
+}
+
+#websites-container table tr {
+    border-bottom: 1px solid grey;
+    height: 40px;
+}
+#websites-container table th, #websites-container table td{
+    font-size: 0.9rem;
+    text-align: start;
+}
+
+
+
+/******************
+
+
+website-info.html
+
+
+******************/
+
+#back-btn {
+    position: absolute; top: 0; left: 20px; text-decoration: none; color: black; background: none; border: none; cursor: pointer; font-size: 40px
+}
+#website-info-btn {
+    display: flex;
+    background-color: var(--sky-blue);
+    color: white;
+    text-decoration: none;
+    width: max-content;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+#website-info-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--lite-white);
+    width: 600px;
+    height: max-content;
+    position: relative;
+    top: 100px;
+    padding: 30px;
+    border-radius: 20px;
+    gap: 20px;
+}
+
+#form-website-info {
+    display: flex;
+    flex-direction: row;
+    height: 130px;
+    width: 450px;
+    justify-content: space-between;
+    align-self: center
+}
+
+#form-website-info label, 
+#form-website-info input, 
+#form-website-info button {
+    width: max-content
+}
+
+#form-website-info label {
+    font-size: 0.9rem
+}
+#form-website-info input, #form-website-info select {
+    display: flex;
+    padding: 4px 8px;
+    border-radius: 5px;
+    outline: none;
+    border: 1px solid var(--sky-blue)
+}
+
+#form-website-info button {
+    background-color: var(--sky-blue);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+#form-website-info div:nth-child(1), #form-website-info div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#website-info-container table {
+    border-collapse: collapse;
+}
+
+#website-info-container table tr {
+    border-bottom: 1px solid grey;
+    height: 50px;
+}
+
+#website-info-container table th, #website-info-container table td {
+    font-size: 0.9rem;
+    text-align: start;
 }

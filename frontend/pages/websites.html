@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг веб-сайтов</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="container" style="align-items: start">
+        <button id="logout-btn">Log out</button>
+        <div id="websites-container">
+            <div id="top-section">
+                <form id="form-website">
+                    <h4>Добавление сайта в мониторинг</h4>
+                    <label for="url">URL-адрес</label>
+                    <input type="url" id="url" placeholder="https://example.com">
+                    <label for="name">Название сайта</label>
+                    <input type="text" id="name" placeholder="Название">
+                    <button type="submit">Добавить</button>
+                </form>
+                <form id="form-telegram">
+                    <h4>Привязка Telegram</h4>
+                    <label>Telegram</label>
+                    <input type="text" placeholder="Telegram username">
+                    <button type="submit">Привязать Telegram</button>
+                </form>
+            </div>
+            <table>
+                <h4>Мониторинг сайтов</h4>
+                <tr>
+                    <th>URL</th>
+                    <th>Название</th>
+                    <th>Статус</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script src="../js/script.js"></script>
+    <script>
+        verify_user()
+
+        async function show_websites() {
+            response = await fetch("http://localhost:8000/api/websites", {
+                method: "GET",
+                headers: {"Authorization": `Bearer ${localStorage.getItem("access_token")}`}
+            });
+            
+            table = document.getElementById("websites-container").querySelector("table");
+
+            res = await response.json();
+            res.forEach(website => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${website.url}</td>
+                        <td>${website.name}</td>
+                        <td>${website.is_active ? "Активен" : "Неактивен"}</td>
+                        <td><a id="website-info-btn" href="website-info.html?w_id=${website.id}">Посмотреть</a></td>
+                    </tr>
+                `
+            })
+        }
+        show_websites();
+
+
+        form_website = document.getElementById("form-website");
+        form_website.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            url = form_website.querySelector("#url").value;
+            url_name = form_website.querySelector("#name").value;
+
+            response = await fetch("http://localhost:8000/api/websites", {
+                method: "POST",
+                headers: {"Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("access_token")}`},
+                body: JSON.stringify({"name": url_name, "url": url})
+            });
+            if (response.status == 401) {
+                window.location.href = "login.html";
+            }
+            res = await response.json();
+            alert(res.message);
+        })
+        document.getElementById("logout-btn").addEventListener("click", ()=> {
+            localStorage.removeItem("access_token");
+            window.location.href = "login.html";
+        })
+
+
+    </script>
+</body>
+</html>

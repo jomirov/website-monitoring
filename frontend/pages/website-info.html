@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о мониторинге</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="container">
+        <a id="back-btn" href="websites.html">&leftarrow;</a>
+        <button id="logout-btn">Log out</button>
+        <div id="website-info-container">
+            <h4>Данные о веб-сайте</h4>
+            <form id="form-website-info">
+                <div>
+                    <label for="name">Название</label>
+                    <input disabled id="name" placeholder="name">
+                    <label for="url">URL-адрес</label>
+                    <input disabled id="url" placeholder="url">
+                    <button id="change-btn" type="button">Изменить</button>
+                </div>
+                <div>
+                    <label for="check-interval">Интервал проверки (сек.)</label>
+                    <input readonly type="number" id="check-interval" min="60" max="600" placeholder="check-interval">
+                    <label for="is-active">Состояние</label>
+                    <select disabled id="is-active" placeholder="is_active">
+                        <option value="active">Активно</option>
+                        <option value="inactive">Неактивно</option>
+                    </select>
+                    <div style="display:flex;justify-content: space-between;">
+                        <button type="submit">Сохранить</button>
+                        <button id="website-del-btn" style="background-color: red;" type="button">Удалить</button>
+                    </div>
+                </div>
+            </form>
+            <table>
+                <h4>Лог-журнал</h4>
+                <tr>
+                    <th>Код статуса</th>
+                    <th>Время ответа (мс.)</th>
+                    <th>Статус</th>
+                    <th>Время проверки</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script src="../js/script.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search); 
+        input_name = document.getElementById("name");
+        input_url = document.getElementById("url");
+        input_check_interval = document.getElementById("check-interval");
+        select_is_active = document.getElementById("is-active");
+
+        verify_user()
+        
+        form_website_info = document.getElementById("form-website-info");
+
+        form_website_info.querySelector("#change-btn").addEventListener("click", () => {
+            document.getElementById("check-interval").removeAttribute("readonly");
+            form_website_info.querySelector("select").removeAttribute("disabled");
+        });
+
+        get_info_and_logs()
+
+        async function get_info_and_logs() {
+            response = await fetch(`http://localhost:8000/api/websites/${params.get("w_id")}/stats`, {
+                headers: {"Authorization": `Bearer ${localStorage.getItem("access_token")}`}
+            });
+            res = await response.json();
+
+
+            input_name.value = res.website.name;
+            input_url.value = res.website.url;
+            input_check_interval.value = res.website.check_interval;
+            select_is_active.value = res.website.is_active ? "active" : "inactive";
+
+
+            table = document.getElementById("website-info-container").querySelector("table");
+
+            res.check_logs.forEach(log => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${log.status_code}</td>
+                        <td>${log.response_time_ms}</td>
+                        <td>${log.is_up ? "Активно" : "Неактивно"}</td>
+                        <td>${log.checked_at}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById("website-del-btn").addEventListener("click", async () => {
+            response = await fetch(`http://localhost:8000/api/websites/${params.get("w_id")}`, {
+                method: "DELETE",
+                headers: {"Authorization": `Bearer ${localStorage.getItem("acccess_token")}`}
+            });
+            window.location.href = "websites.html"
+        })
+
+        form_website_info.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            response = await fetch(`http://localhost:8000/api/websites/${params.get("w_id")}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json", 
+                        "Authorization": `Bearer ${localStorage.getItem("access_token")}`},
+                body: JSON.stringify({"check_interval": input_check_interval.value, "is_active": select_is_active.value === "active" ? true : false})
+            })
+        })
+
+    </script>
+</body>
+</html>
