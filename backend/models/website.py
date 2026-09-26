@@ -19,3 +19,7 @@ class Website(Base):
 class WebsiteRequest(BaseModel):
     name: str
     url: HttpUrl
+
+class UpdateValues(BaseModel):
+    check_interval: int
+    is_active: bool

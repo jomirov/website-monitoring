@@ -2,6 +2,7 @@ from ..db import engine
 from ...models.check_log import Check_log
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 class CheckLogRepository:
     def add_check_log(self, website_id, 
@@ -20,7 +21,7 @@ class CheckLogRepository:
 
     def get_logs_by_website_id(self, website_id):
         with Session(engine) as session:
-            res = session.execute(select(Check_log).where(Check_log.website_id==website_id)).all()
+            res = session.execute(select(Check_log).where(Check_log.website_id==website_id).limit(10)).all()
             logs = []
 
             for row in res:
@@ -30,7 +31,7 @@ class CheckLogRepository:
                     "status_code": row[0].status_code,
                     "response_time_ms": row[0].response_time_ms,
                     "is_up": row[0].is_up,
-                    "checked_at": row[0].checked_at
+                    "checked_at": datetime.strftime(row[0].checked_at, "%Y-%m-%d %H:%M")
                 })
 
             return logs

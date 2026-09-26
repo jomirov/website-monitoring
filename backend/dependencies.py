@@ -1,5 +1,5 @@
 import dotenv, httpx, time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .database.repositories.websiteRepository import WebsiteRepository
 from .database.repositories.checkLogRepository import CheckLogRepository
 from .database.repositories.userRepository import UserRepository
@@ -35,7 +35,7 @@ def check_websites():
             check_logs = cl_repo.get_logs_by_website_id(w_id)
             if len(check_logs) == 0:
                 pass
-            elif datetime.timestamp(check_logs[-1]["checked_at"]) > time.time() - w_check_interval:
+            elif datetime.timestamp(datetime.strptime(check_logs[-1]["checked_at"], "%Y-%m-%d %H:%M")) > time.time() - w_check_interval:
                 continue
 
             status = check_url(w_url)
@@ -64,10 +64,10 @@ def authenticate_user(form: UserAuth):
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
 
-    if timedelta:
-        expire = datetime.now() + expires_delta
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now() + timedelta(minutes=5)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=5)
 
     to_encode.update({"exp":expire})
 
@@ -79,8 +79,15 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 def get_current_user(token):
     repo = UserRepository()
-    data = jwt.decode(token, SECRET_KEY=dotenv.get_key(".env", "SECRET_KEY"), algorithms=[dotenv.get_key(".env", "ALGORITHM")])
-
+    try:
+        data = jwt.decode(token, key=dotenv.get_key(".env", "SECRET_KEY"), algorithms=[dotenv.get_key(".env", "ALGORITHM")])
+    except:
+        raise ValueError
     email = data.get("sub")
-    
-    return repo.get_user_by_email(email)
+
+    user = repo.get_user_by_email(email)
+
+    return {
+        "id": user["id"],
+        "email": user["email"]
+    }

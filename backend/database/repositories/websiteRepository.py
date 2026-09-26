@@ -1,9 +1,8 @@
 import time
 from ..db import engine
-from sqlalchemy import select, delete, Null
+from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session
 from ...models.website import Website
-from ...models.check_log import Check_log
 
 class WebsiteRepository:
     def insert_website(self, user_id, name, url):
@@ -33,6 +32,9 @@ class WebsiteRepository:
         with Session(engine) as session:
             res = session.execute(select(Website).where(Website.id==id)).first()
 
+            if not res:
+                raise ValueError
+            
             return {
                 "id": res[0].id,
                 "user_id": res[0].user_id,
@@ -57,24 +59,15 @@ class WebsiteRepository:
 
             return websites
 
-
-    def get_all_websites(self):
+    def update_website_is_active(self, id, new_state):
         with Session(engine) as session:
-            res = session.execute(select(Website)).all()
+            session.execute(update(Website).where(Website.id==id).values(is_active=new_state))
+            session.commit()
 
-            websites = []
-
-            for row in res:
-                websites.append({
-                    "id": row[0].id,
-                    "user_id": row[0].user_id,
-                    "name": row[0].name,
-                    "url": row[0].url,
-                    "check_interval": row[0].check_interval,
-                    "is_active": row[0].is_active
-                })
-
-            return websites
+    def update_website_check_interval(self, id, new_value):
+        with Session(engine) as session:
+            session.execute(update(Website).where(Website.id==id).values(check_interval=new_value))
+            session.commit()
 
     def delete_website_by_id(self, id):
         with Session(engine) as session:

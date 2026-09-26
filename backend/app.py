@@ -39,9 +39,13 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
     access_token_expire_minutes = timedelta(minutes=int(get_key(".env", "ACCESS_TOKEN_EXPIRE_MINUTES")))
     access_token = create_access_token(data={"sub": user.get("email")}, expires_delta=access_token_expire_minutes)
-
+    print(access_token)
     return JSONResponse({"access_token": access_token, "token_type": "bearer"})
 
-@app.post('/users/me')
+@app.get('/users/me')
 def current_user(token: str = Depends(oauth2_scheme)):
-    return JSONResponse(get_current_user(token), status_code=200)
+    try:
+        user = get_current_user(token)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Unauthorized or token expired")
+    return JSONResponse(user, status_code=200)
